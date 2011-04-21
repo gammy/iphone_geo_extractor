@@ -12,14 +12,27 @@ use warnings;
 
 use DBI;
 use Data::Dumper;
-use Geo::GoogleEarth::Document;
+use Geo::GoogleEarth::Pluggable;
 
 die "Usage: $0 <consolidated.db>\n" if @ARGV == 0;
 my $DB = pop @ARGV;
 die "\"$DB\" is not a file\n" if ! -f "$DB";
 
 my $dbh = DBI->connect("dbi:SQLite:$DB") or die "$!";
-my $kml = new Geo::GoogleEarth::Document;
+my $kml = new Geo::GoogleEarth::Pluggable;
+my $kml_cells = $kml->Folder(name => "Cell towers");
+my $kml_aps   = $kml->Folder(name => "Access points");
+my $kml_style_cells = $kml->IconStyle(
+color => {	red   => 0, 
+		green => 255,
+		blue  => 0},
+href  => "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
+
+my $kml_style_aps   = $kml->IconStyle(
+color => {	red   => 0, 
+		green => 0,
+		blue  => 255},
+href  => "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
 
 my $res;
 my %count;
@@ -43,12 +56,23 @@ $res = $dbh->selectall_arrayref("SELECT
 					HorizontalAccuracy,
 					Confidence
 				FROM
-					WifiLocation");
+					WifiLocation
+				LIMIT
+					10");
 foreach(@$res) {
 	my($mac, $ts, $lat, $long, $h, $c) = @$_;
-	$kml->Placemark(name => $mac,
-			lat  => $lat,
-			lon  => $long);
+
+	my $desc = sprintf("MAC: %s (partial)\n".
+			   "Timestamp: %s\n".
+			   "Horizontal accuracy: %s\n".
+			   "Confidence: %s\n",
+			   $mac, $ts, $h, $c);
+
+	$kml_aps->Point(name        => "AP",
+			description => $desc,
+			lat         => $lat,
+			lon         => $long,
+			style       => $kml_style_aps);
 }
 
 print "Reading Wifi locations..\n";
@@ -63,13 +87,26 @@ $res = $dbh->selectall_arrayref("SELECT
 					HorizontalAccuracy,
 					Confidence
 				FROM
-					CellLocation");
+					CellLocation
+				LIMIT
+					10");
 foreach(@$res) {
 	my($mcc, $mnc, $lac, $ci, $ts, $lat, $long, $h, $c) = @$_;
-	my $name = "Cell [MCC=$mcc,MNC=$mnc,LAC=$lac,CI=$ci]";
-	$kml->Placemark(name => $name,
-			lat  => $lat,
-			lon  => $long);
+
+	my $desc = sprintf("MCC: %s\n".
+			   "MNC: %s\n".
+			   "LAC: %s\n".
+			   "CI: %s\n".
+			   "Timestamp: %s\n".
+			   "Horizontal accuracy: %s\n".
+			   "Confidence: %s\n",
+			   $mcc, $mnc, $lac, $ci, $ts, $h, $c);
+
+	$kml_cells->Point(name        => "Cell",
+			  description => $desc,
+			  lat         => $lat,
+			  lon         => $long,
+			  style       => $kml_style_cells);
 }
 
 print "Storing to file..\n";
