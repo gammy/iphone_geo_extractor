@@ -48,7 +48,7 @@ printf("%6d Cells\n%6d APs\n(%d total)\n\n",
       $count{WifiLocation},
       $count{total});
 
-print "Reading Cell locations..\n";
+print "Reading Wifi locations..\n";
 $res = $dbh->selectall_arrayref("SELECT
 					MAC, 
 					Timestamp,
@@ -62,7 +62,7 @@ $res = $dbh->selectall_arrayref("SELECT
 foreach(@$res) {
 	my($mac, $ts, $lat, $long, $h, $c) = @$_;
 
-	#next if ++$skip % 1 == 0;
+	#next if ++$skip % 2 == 0;
 
 	my $desc = sprintf("MAC: %s (partial)\n".
 			   "Timestamp: %s\n".
@@ -78,7 +78,7 @@ foreach(@$res) {
 
 }
 
-print "Reading Wifi locations..\n";
+print "Reading Cell locations..\n";
 $res = $dbh->selectall_arrayref("SELECT
 					MCC, 
 					MNC,
@@ -94,7 +94,7 @@ $res = $dbh->selectall_arrayref("SELECT
 foreach(@$res) {
 	my($mcc, $mnc, $lac, $ci, $ts, $lat, $long, $h, $c) = @$_;
 
-	#next if ++$skip % 8 == 0;
+	#next if ++$skip % 4 == 0;
 
 	my $desc = sprintf("MCC: %s\n".
 			   "MNC: %s\n".
