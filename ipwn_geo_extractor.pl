@@ -55,9 +55,7 @@ $res = $dbh->selectall_arrayref("SELECT
 					HorizontalAccuracy,
 					Confidence
 				FROM
-					WifiLocation
-				LIMIT
-					10");
+					WifiLocation");
 foreach(@$res) {
 	my($mac, $ts, $lat, $long, $h, $c) = @$_;
 
@@ -86,9 +84,7 @@ $res = $dbh->selectall_arrayref("SELECT
 					HorizontalAccuracy,
 					Confidence
 				FROM
-					CellLocation
-				LIMIT
-					10");
+					CellLocation");
 foreach(@$res) {
 	my($mcc, $mnc, $lac, $ci, $ts, $lat, $long, $h, $c) = @$_;
 
