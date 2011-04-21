@@ -5,7 +5,8 @@
 #
 # Tables of interest are CellLocation and WifiLocation.
 # This file only exists on iOS 4.0 or later.
-# by gammy
+#
+# by gammy 
 
 use strict;
 use warnings;
@@ -33,6 +34,7 @@ color => {	red   => 0,
 		blue  => 255},
 href  => "http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
 
+my $skip = 0;
 my $res;
 my %count;
 
@@ -56,8 +58,11 @@ $res = $dbh->selectall_arrayref("SELECT
 					Confidence
 				FROM
 					WifiLocation");
+
 foreach(@$res) {
 	my($mac, $ts, $lat, $long, $h, $c) = @$_;
+
+	#next if ++$skip % 1 == 0;
 
 	my $desc = sprintf("MAC: %s (partial)\n".
 			   "Timestamp: %s\n".
@@ -70,6 +75,7 @@ foreach(@$res) {
 			lat         => $lat,
 			lon         => $long,
 			style       => $kml_style_aps);
+
 }
 
 print "Reading Wifi locations..\n";
@@ -88,6 +94,8 @@ $res = $dbh->selectall_arrayref("SELECT
 foreach(@$res) {
 	my($mcc, $mnc, $lac, $ci, $ts, $lat, $long, $h, $c) = @$_;
 
+	#next if ++$skip % 8 == 0;
+
 	my $desc = sprintf("MCC: %s\n".
 			   "MNC: %s\n".
 			   "LAC: %s\n".
@@ -102,6 +110,7 @@ foreach(@$res) {
 			  lat         => $lat,
 			  lon         => $long,
 			  style       => $kml_style_cells);
+	
 }
 
 print "Storing to file..\n";
