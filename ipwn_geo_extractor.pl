@@ -11,7 +11,6 @@ use strict;
 use warnings;
 
 use DBI;
-use Data::Dumper;
 use Geo::GoogleEarth::Pluggable;
 
 die "Usage: $0 <consolidated.db>\n" if @ARGV == 0;
